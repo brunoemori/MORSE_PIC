@@ -4,7 +4,8 @@ robot1 = ATRV()
 motion = MotionVW()
 robot1.append(motion)
 
-#robot1.translate(y=2)
+robot1.translate(x = 22.32, y = -21.24)
+robot1.rotate(z = 90)
 
 sick = Sick()
 sick.properties(laser_range = 10)
@@ -18,7 +19,7 @@ pose.add_stream('socket')
 robot1.append(pose)
 
 mov = Keyboard()
-mov.properties(Speed = 2)
+mov.properties(Speed = 5)
 robot1.append(mov)
 
 camera = VideoCamera()
