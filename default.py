@@ -24,6 +24,7 @@ robot1.append(mov)
 
 camera = VideoCamera()
 camera.translate(z = 1)
+camera.rotate(z = 3.1415)
 robot1.append(camera)
 
 motion.add_interface('socket')
@@ -31,6 +32,6 @@ pose.add_interface('socket')
 sick.add_interface('socket')
 
 env = Environment('indoors-1/boxes')
-env.set_camera_location([10, -10, 12])
-env.set_camera_rotation([1.0470, 0, 0.7854])
+env.set_camera_location([0, 0, 60])
+env.set_camera_rotation([0, 0, 0])
 env.select_display_camera(camera)
