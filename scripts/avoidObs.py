@@ -2,7 +2,7 @@ from pymorse import Morse
 import random
 
 def isCloseRight(sick_stream):
-    listRange = sick_stream.get()
+		listRange = sick_stream.get()
     rangeValues = listRange['range_list']
     rightSensorLen = int(len(rangeValues) / 2)
     for i in range(0, rightSensorLen):
@@ -21,8 +21,6 @@ def isCloseLeft(sick_stream):
         else:
             return False
 
-   
-
 def getDir(sick_stream):
     listRange = sick_stream.get()
     rangeValues = listRange['range_list']
@@ -38,7 +36,6 @@ def main():
     with Morse() as morse:
         motion = morse.robot1.motion
         robotSick = morse.robot1.sick
-
         while True:
             sensorRight = isCloseRight(robotSick)
             sensorLeft = isCloseLeft(robotSick)
@@ -46,7 +43,7 @@ def main():
                 v_w = {"v": 1, "w": 2}
             elif sensorRight:
                 v_w = {"v": 1, "w": 2}
-            elif sensorLeft:
+    	      elif sensorLeft:
                 v_w = {"v": 1, "w": 2}
             else:
                 v_w = {"v": 2, "w": 0}
