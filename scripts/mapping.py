@@ -12,6 +12,7 @@ def getSickPointList(sickStream):
     return sickSensor['point_list']
 
 def refreshGrid(posX, posY, thetaAngle, idRobot):
+    borderLeft = borderRight = borderSup = borderInf = 0
     with Morse() as morse:
         rangeLaser = getSickRangeList
         rangePoint = getSickPointList
@@ -32,7 +33,6 @@ def refreshGrid(posX, posY, thetaAngle, idRobot):
             if (yL < 0): yL = 0 #Verify!
             if (yL > const.MAP_HEIGHT): yL = const.MAP_HEIGHT
 
-            #Verify where is defined the borders' variables
             if (borderLeft > xL): borderLeft = xL
             if (borderRight < xL): borderRight = xL
             if (borderSup < yL): borderSup = yL
@@ -43,7 +43,10 @@ def refreshGrid(posX, posY, thetaAngle, idRobot):
             if (borderSup > const.MAP_HEIGHT): yL = borderSup = const.MAP_HEIGHT
             if (borderInf < 0): yL = borderInf = 0
 
-            setGlobalMap(xL, yL, borderLeft, borderRight, borderInf, borderSup) #Function not implemented
+            setGlobalMap(borderLeft, borderRight, borderInf, borderSup) #Function not implemented
 
 def main():
+    #Instanciar a matriz global nates de chamar refreshGrid
+    #cellMap = simCell[HEIGHT][WIDTH]
+    #globalMapInst = globalMap(..., cellMap)
 
