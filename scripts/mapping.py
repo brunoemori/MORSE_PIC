@@ -1,5 +1,6 @@
 from pymorse import Morse
 import const
+import mapDef
 
 def getSickRangeList(sickStream):
     sickSensor = sickStream.get()
@@ -10,7 +11,7 @@ def getSickPointList(sickStream):
 
     return sickSensor['point_list']
 
-def remapGrid(posX, posY, thetaAngle, idRobot):
+def refreshGrid(posX, posY, thetaAngle, idRobot):
     with Morse() as morse:
         rangeLaser = getSickRangeList
         rangePoint = getSickPointList
@@ -21,9 +22,7 @@ def remapGrid(posX, posY, thetaAngle, idRobot):
             else:
                 rateOC = 0.48
 
-            thisRange = rangeLaser[i]
-
-            #Defining the points of laser obstacle detection
+            #Defining the points of laser detection
             xL = rangePoint[i][const.X_COORD]
             yL = rangePoint[i][const.Y_COORD]
 
@@ -33,7 +32,7 @@ def remapGrid(posX, posY, thetaAngle, idRobot):
             if (yL < 0): yL = 0 #Verify!
             if (yL > const.MAP_HEIGHT): yL = const.MAP_HEIGHT
 
-            #Verify where's defined the borders' variables
+            #Verify where is defined the borders' variables
             if (borderLeft > xL): borderLeft = xL
             if (borderRight < xL): borderRight = xL
             if (borderSup < yL): borderSup = yL
