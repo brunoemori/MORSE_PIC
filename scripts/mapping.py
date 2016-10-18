@@ -4,10 +4,11 @@ import mapDef
 import math
 
 simMapCell = []
-for i in range(0, const.MAP_HEIGHT * const.MAP_WIDTH):
-    simMapCell[i] = mapCell(0.5, 0.0, 0, -1)
+for i in range(const.MAP_HEIGHT * const.MAP_WIDTH):
+    simMapCell.append(mapDef.mapCell())
 
-simGlobalMap = globalMap(0, 0, 0, 0, simMapCell)
+#Global map 
+simGlobalMap = mapDef.globalMap(simMapCell)
 
 def getSickRangeList(sickStream):
     sickSensor = sickStream.get()
@@ -37,8 +38,8 @@ def refreshGrid(posX, posY, angLaser, thetaAngle, idRobot):
             #Adjusting the map's borders
             tempAng = angLaser[i]
             if ((xL == 0) and (yL == 0) and (zL == 0)):
-                xL = math.cos(angLase[i] + thetaAngle) * (rangeLaser[i] / const.RESL) + posX
-                yL = math.sin(angLase[i] + thetaAngle) * (rangeLaser[i] / const.RESL) + posY
+                xL = math.cos(angLaser[i] + thetaAngle) * (rangeLaser[i] / const.RESL) + posX
+                yL = math.sin(angLaser[i] + thetaAngle) * (rangeLaser[i] / const.RESL) + posY
 
             else:
                 if (xL < 0): xL = 0
@@ -58,4 +59,16 @@ def refreshGrid(posX, posY, angLaser, thetaAngle, idRobot):
 
             mapDef.setGlobalMap(simGlobalMap, borderLeft, borderRight, borderInf, borderSup)
 
+            deltaX = abs(xL - posX)
+            deltaY = abs(yL - posY)
+
+            if (xL < posX): sX = 1
+            else: sX = -1
+
+            if (yL < posY): sY = 1
+            else: sT = -1
+            
+            error = deltaX - deltaY
+
 def main():
+    
