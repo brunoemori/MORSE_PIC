@@ -4,8 +4,9 @@ import mapDef
 import math
 
 simMapCell = []
+mapObj = mapDef.mapCell()
 for i in range(const.MAP_HEIGHT * const.MAP_WIDTH):
-    simMapCell.append(mapDef.mapCell())
+    simMapCell.append(mapObj)
 
 #Global map 
 simGlobalMap = mapDef.globalMap(simMapCell)
@@ -38,14 +39,16 @@ def refreshGrid(posX, posY, angLaser, thetaAngle, idRobot):
             #Adjusting the map's borders
             tempAng = angLaser[i]
             if ((xL == 0) and (yL == 0) and (zL == 0)):
-                xL = math.cos(angLaser[i] + thetaAngle) * (rangeLaser[i] / const.RESL) + posX
-                yL = math.sin(angLaser[i] + thetaAngle) * (rangeLaser[i] / const.RESL) + posY
-
+                xL = ((math.cos(angLaser[i] + thetaAngle) * rangeLaser[i]) / const.RESL) + posX
+                yL = ((math.sin(angLaser[i] + thetaAngle) * rangeLaser[i]) / const.RESL) + posY
             else:
-                if (xL < 0): xL = 0
-                if (xL > const.MAP_WIDTH): xL = const.MAP_WIDTH
-                if (yL < 0): yL = 0
-                if (yL > const.MAP_HEIGHT): yL = const.MAP_HEIGHT
+                xL = xL / const.RESL
+                yL = yL / const.RESL
+
+            if (xL < 0): xL = 0
+            if (xL > const.MAP_WIDTH): xL = const.MAP_WIDTH
+            if (yL < 0): yL = 0
+            if (yL > const.MAP_HEIGHT): yL = const.MAP_HEIGHT
 
             if (borderLeft > xL): borderLeft = xL
             if (borderRight < xL): borderRight = xL
@@ -57,7 +60,7 @@ def refreshGrid(posX, posY, angLaser, thetaAngle, idRobot):
             if (borderSup > const.MAP_HEIGHT): yL = borderSup = const.MAP_HEIGHT
             if (borderInf < 0): yL = borderInf = 0
 
-            mapDef.setGlobalMap(simGlobalMap, borderLeft, borderRight, borderInf, borderSup)
+            simGlobalMap = mapDef.setGlobalMap(borderLeft, borderRight, borderInf, borderSup)
 
             deltaX = abs(xL - posX)
             deltaY = abs(yL - posY)
