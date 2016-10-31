@@ -19,8 +19,12 @@ def getSickPointList(sickStream):
     sickSensor = sickStream.get()
     return sickSensor['point_list']
 
-def refreshGrid(posX, posY, angLaser, thetaAngle, idRobot):
+def refreshGrid(posX, posY, angLaser, thetaAngle, idRobot): 
+    #posX and posY are the coordinates of the robot;
+    #thetaAngle is the angle (radians) of the robot relative to the world
+
     borderLeft = borderRight = borderSup = borderInf = 0
+    #Borders of each robots' map
     with Morse() as morse:
         rangeLaser = getSickRangeList
         rangePoint = getSickPointList
@@ -39,8 +43,8 @@ def refreshGrid(posX, posY, angLaser, thetaAngle, idRobot):
             #Adjusting the map's borders
             tempAng = angLaser[i]
             if ((xL == 0) and (yL == 0) and (zL == 0)):
-                xL = ((math.cos(angLaser[i] + thetaAngle) * rangeLaser[i]) / const.RESL) + posX
-                yL = ((math.sin(angLaser[i] + thetaAngle) * rangeLaser[i]) / const.RESL) + posY
+                xL = ((math.cos(angLaser[i] + thetaAngle) * rangeLaser[i]) / const.RESL) + posX # 
+                yL = ((math.sin(angLaser[i] + thetaAngle) * rangeLaser[i]) / const.RESL) + posY #
             else:
                 xL = xL / const.RESL
                 yL = yL / const.RESL
@@ -65,13 +69,38 @@ def refreshGrid(posX, posY, angLaser, thetaAngle, idRobot):
             deltaX = abs(xL - posX)
             deltaY = abs(yL - posY)
 
+            #deltaX, deltaY, sX, sY, error, error2 are variables used to travel the map's cells
+            #Using Bresenhan's Line Algorithm
             if (xL < posX): sX = 1
             else: sX = -1
 
             if (yL < posY): sY = 1
-            else: sT = -1
+            else: sY = -1
             
             error = deltaX - deltaY
+
+            while True:
+                auxOC = mapDef.getGlobalMapOccupancyGrid(simGlobalMap, xL, yL)
+                simGlobalMap = mapDef.setGlobalMapOccupancyGrid(xL, yL, 1 - pow((1 + (rateOC / (1 - rateOC)) * ((1 - const.PRIORI) / const.PRIORI) * (auxOC / ((1 - auxOC) + 0.00001))), -1) + 0.00001)
+                simGlobalMap = mapDef.setGlobalMapVisit(xL, yL)
+
+                if (rateOC > 0.5):
+                    rateOC = 0.48
+                else:
+                    rateOC = rateOC * 0.95
+
+                if (xL == posX) and (yL == posY):
+                    break
+
+                error2 = 2 * error
+
+                if (error2 > (-1) * deltaY):
+                    error = error - deltaY
+                    xL = xL + sX
+
+                if (erro2 < deltaX):
+                    error = error + deltaX
+                    yL = yL + sY
 
 def main():
     
