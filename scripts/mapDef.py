@@ -1,13 +1,13 @@
 import const
 
-class mapCell:
+class MapCell:
     def __init__(self):
         self.occupancyGrid = 0.5
         self.qPheromone = 0.0
         self.rPath = 0
         self.visit = -1
 
-class globalMap:
+class GlobalMap:
     def __init__(self, cellMap):
         self.borderLeft = 0
         self.borderRight = 0
@@ -17,9 +17,9 @@ class globalMap:
 
     def setGlobalMapBorders(self, borderLeft, borderRight, borderSup, borderInf):
         self.borderLeft = borderLeft
-        self.globalMap.borderRight = borderRight
-        self.globalMap.borderSup = borderSup
-        self.globalMap.borderInf = borderInf
+        self.borderRight = borderRight
+        self.borderSup = borderSup
+        self.borderInf = borderInf
 
     def setGlobalMapOccupancyGrid(self, x, y, prob):
         if ((x >= 0) and (y >= 0) and (x < const.MAP_WIDTH) and (y < const.MAP_HEIGHT)):
