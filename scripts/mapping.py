@@ -4,12 +4,12 @@ import mapDef
 import math
 
 simMapCell = []
-mapObj = mapDef.mapCell()
+mapObj = mapDef.MapCell()
 for i in range(const.MAP_HEIGHT * const.MAP_WIDTH):
     simMapCell.append(mapObj)
 
 #Global map 
-simGlobalMap = mapDef.globalMap(simMapCell)
+simGlobalMap = mapDef.GlobalMap(simMapCell)
 
 def getSickRangeList(sickStream):
     sickSensor = sickStream.get()
@@ -19,16 +19,21 @@ def getSickPointList(sickStream):
     sickSensor = sickStream.get()
     return sickSensor['point_list']
 
-def refreshGrid(posX, posY, angLaser, thetaAngle, idRobot): 
+def getPoseYaw(poseStream):
+    robotYaw = poseStream.get()
+    return robotYaw['yaw']
+
+def refreshGrid(idRobot): 
     #posX and posY are the coordinates of the robot;
     #thetaAngle is the angle (radians) of the robot relative to the world
 
     borderLeft = borderRight = borderSup = borderInf = 0
     #Borders of each robots' map
     with Morse() as morse:
-        rangeLaser = getSickRangeList
-        rangePoint = getSickPointList
-        for i in range(const.FIRST_LASER, const.FINAL_LASER + 1):
+        rangeLaser = getSickRangeList(idRobot.sick)
+        rangePoint = getSickPointList(idRobot.sick)
+        thetaAngle = getPoseYaw(idRobot.pose)
+        for i in range(const.FIRST_LASER, const.LAST_LASER + 1):
 
             if rangeLaser[i] < (const.RANGE_MAX * const.RANGE_LIMIT):
                 rateOC = 0.9
@@ -41,7 +46,7 @@ def refreshGrid(posX, posY, angLaser, thetaAngle, idRobot):
             zL = rangePoint[i][const.Z_COORD]
 
             #Adjusting the map's borders
-            tempAng = angLaser[i]
+            tempAng = 0.0087
             if ((xL == 0) and (yL == 0) and (zL == 0)):
                 xL = ((math.cos(angLaser[i] + thetaAngle) * rangeLaser[i]) / const.RESL) + posX # 
                 yL = ((math.sin(angLaser[i] + thetaAngle) * rangeLaser[i]) / const.RESL) + posY #
@@ -64,7 +69,7 @@ def refreshGrid(posX, posY, angLaser, thetaAngle, idRobot):
             if (borderSup > const.MAP_HEIGHT): yL = borderSup = const.MAP_HEIGHT
             if (borderInf < 0): yL = borderInf = 0
 
-            simGlobalMap = mapDef.setGlobalMap(borderLeft, borderRight, borderInf, borderSup)
+            simGlobalMap.setGlobalMapBorders(borderLeft, borderRight, borderInf, borderSup)
 
             deltaX = abs(xL - posX)
             deltaY = abs(yL - posY)
@@ -103,4 +108,10 @@ def refreshGrid(posX, posY, angLaser, thetaAngle, idRobot):
                     yL = yL + sY
 
 def main():
-    
+    with Morse() as morse:
+        #Returns the list of robots used in the simulation
+        listRobots = morse.rpc('simulation', 'list_robots')
+        refreshGrid(morse.robot1)
+
+if __name__ == "__main__":
+    main()
