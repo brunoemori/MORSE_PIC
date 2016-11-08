@@ -23,7 +23,15 @@ def getPoseYaw(poseStream):
     robotYaw = poseStream.get()
     return robotYaw['yaw']
 
-def refreshGrid(idRobot): 
+def getPosePositionX(poseStream):
+    robotPositionX = poseStream.get()
+    return robotPositionX['x']
+
+def getPosePositionY(poseStream):
+    robotPositionX = poseStream.get()
+    return robotPositionX['y']
+
+def refreshGrid(idRobot, globalMap): 
     #posX and posY are the coordinates of the robot;
     #thetaAngle is the angle (radians) of the robot relative to the world
 
@@ -32,9 +40,13 @@ def refreshGrid(idRobot):
     with Morse() as morse:
         rangeLaser = getSickRangeList(idRobot.sick)
         rangePoint = getSickPointList(idRobot.sick)
-        thetaAngle = getPoseYaw(idRobot.pose)
-        for i in range(const.FIRST_LASER, const.LAST_LASER + 1):
 
+        thetaAngle = getPoseYaw(idRobot.pose)
+        posX = getPosePositionX(idRobot.pose)
+        posY = getPosePositionY(idRobot.pose)
+
+        for i in range(const.FIRST_LASER, const.LAST_LASER + 1):
+            angLaser = 0.0083 #Verify!
             if rangeLaser[i] < (const.RANGE_MAX * const.RANGE_LIMIT):
                 rateOC = 0.9
             else:
@@ -46,13 +58,14 @@ def refreshGrid(idRobot):
             zL = rangePoint[i][const.Z_COORD]
 
             #Adjusting the map's borders
-            tempAng = 0.0087
-            if ((xL == 0) and (yL == 0) and (zL == 0)):
-                xL = ((math.cos(angLaser[i] + thetaAngle) * rangeLaser[i]) / const.RESL) + posX # 
-                yL = ((math.sin(angLaser[i] + thetaAngle) * rangeLaser[i]) / const.RESL) + posY #
-            else:
-                xL = xL / const.RESL
-                yL = yL / const.RESL
+            #if ((xL == 0) and (yL == 0) and (zL == 0)):
+
+            xL = ((math.cos(angLaser + thetaAngle) * rangeLaser[i]) / const.RESL) + posX 
+            yL = ((math.sin(angLaser + thetaAngle) * rangeLaser[i]) / const.RESL) + posY 
+
+            #else:
+            #    xL = xL / const.RESL
+            #    yL = yL / const.RESL
 
             if (xL < 0): xL = 0
             if (xL > const.MAP_WIDTH): xL = const.MAP_WIDTH
@@ -69,7 +82,7 @@ def refreshGrid(idRobot):
             if (borderSup > const.MAP_HEIGHT): yL = borderSup = const.MAP_HEIGHT
             if (borderInf < 0): yL = borderInf = 0
 
-            simGlobalMap.setGlobalMapBorders(borderLeft, borderRight, borderInf, borderSup)
+            globalMap.setGlobalMapBorders(borderLeft, borderRight, borderInf, borderSup) 
 
             deltaX = abs(xL - posX)
             deltaY = abs(yL - posY)
@@ -85,16 +98,16 @@ def refreshGrid(idRobot):
             error = deltaX - deltaY
 
             while True:
-                auxOC = mapDef.getGlobalMapOccupancyGrid(simGlobalMap, xL, yL)
-                simGlobalMap = mapDef.setGlobalMapOccupancyGrid(xL, yL, 1 - pow((1 + (rateOC / (1 - rateOC)) * ((1 - const.PRIORI) / const.PRIORI) * (auxOC / ((1 - auxOC) + 0.00001))), -1) + 0.00001)
-                simGlobalMap = mapDef.setGlobalMapVisit(xL, yL)
+                auxOC = globalMap.getGlobalMapOccupancyGrid(int(xL), int(yL))
+                globalMap.setGlobalMapOccupancyGrid(int(xL), int(yL), 1 - pow((1 + (rateOC / (1 - rateOC)) * ((1 - const.PRIORI) / const.PRIORI) * (auxOC / ((1 - auxOC) + 0.00001))), -1) + 0.00001)
+                globalMap.setGlobalMapVisit(int(xL), int(yL))
 
                 if (rateOC > 0.5):
                     rateOC = 0.48
                 else:
                     rateOC = rateOC * 0.95
 
-                if (xL == posX) and (yL == posY):
+                if (int(xL) == int(posX)) and (int(yL) == int(posY)):
                     break
 
                 error2 = 2 * error
@@ -103,7 +116,7 @@ def refreshGrid(idRobot):
                     error = error - deltaY
                     xL = xL + sX
 
-                if (erro2 < deltaX):
+                if (error2 < deltaX):
                     error = error + deltaX
                     yL = yL + sY
 
@@ -111,7 +124,7 @@ def main():
     with Morse() as morse:
         #Returns the list of robots used in the simulation
         listRobots = morse.rpc('simulation', 'list_robots')
-        refreshGrid(morse.robot1)
+        refreshGrid(morse.robot1, simGlobalMap)
 
 if __name__ == "__main__":
     main()
