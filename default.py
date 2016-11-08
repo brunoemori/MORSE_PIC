@@ -9,7 +9,7 @@ robot1.rotate(z = 90)
 
 sick = Sick()
 sick.properties(laser_range = 10)
-sick.properties(scan_window = 90)
+sick.properties(scan_window = 180)
 sick.properties(Visible_arc = True)
 robot1.append(sick)
 
