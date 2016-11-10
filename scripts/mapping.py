@@ -4,8 +4,8 @@ import mapDef
 import math
 
 simMapCell = []
-mapObj = mapDef.MapCell()
 for i in range(const.MAP_HEIGHT * const.MAP_WIDTH):
+    mapObj = mapDef.MapCell()
     simMapCell.append(mapObj)
 
 #Global map 
@@ -30,6 +30,25 @@ def getPosePositionX(poseStream):
 def getPosePositionY(poseStream):
     robotPositionX = poseStream.get()
     return robotPositionX['y']
+
+def printOccupancyGridMap(globalMap, mapWidth, mapHeight):
+    mapFile = open('occupancy_grid_map', 'w')
+    for i in range(mapWidth * mapHeight):
+        if ((i + 1) % mapWidth == 0):
+            mapFile.write("\n")
+
+        mapFile.write("%.2f " % globalMap.cellMap[i].occupancyGrid)
+    mapFile.close()
+
+def printVisitMap(globalMap, mapWidth, mapHeight):
+    mapFile = open('visit_map', 'w')
+    for i in range(mapWidth * mapHeight):
+        if ((i + 1) % mapWidth == 0):
+            mapFile.write("\n")
+
+        mapFile.write("%i " % globalMap.cellMap[i].visit)
+    mapFile.close()
+
 
 def refreshGrid(idRobot, globalMap): 
     #posX and posY are the coordinates of the robot;
@@ -94,7 +113,7 @@ def refreshGrid(idRobot, globalMap):
 
             if (yL < posY): sY = 1
             else: sY = -1
-            
+
             error = deltaX - deltaY
 
             while True:
@@ -112,7 +131,7 @@ def refreshGrid(idRobot, globalMap):
 
                 error2 = 2 * error
 
-                if (error2 > (-1) * deltaY):
+                if (error2 > (-1) * deltaY):    
                     error = error - deltaY
                     xL = xL + sX
 
@@ -124,7 +143,11 @@ def main():
     with Morse() as morse:
         #Returns the list of robots used in the simulation
         listRobots = morse.rpc('simulation', 'list_robots')
+
         refreshGrid(morse.robot1, simGlobalMap)
+
+        printOccupancyGridMap(simGlobalMap, const.MAP_WIDTH, const.MAP_HEIGHT)
+        printVisitMap(simGlobalMap, const.MAP_WIDTH, const.MAP_HEIGHT)
 
 if __name__ == "__main__":
     main()
