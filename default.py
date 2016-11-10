@@ -4,8 +4,7 @@ robot1 = ATRV()
 motion = MotionVW()
 robot1.append(motion)
 
-robot1.translate(x = 22.32, y = -21.24)
-robot1.rotate(z = 90)
+robot1.translate(x = 0, y = 0)
 
 sick = Sick()
 sick.properties(laser_range = 10)
