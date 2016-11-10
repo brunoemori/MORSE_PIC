@@ -64,6 +64,11 @@ def refreshGrid(idRobot, globalMap):
         posX = getPosePositionX(idRobot.pose)
         posY = getPosePositionY(idRobot.pose)
 
+        print("(Not converted) X = %i, Y = %i" % (posX, posY))
+
+        posX = int((posX + (const.HALF_REALMAP_WIDTH))  / const.RESL)
+        posY = int((posY + (const.HALF_REALMAP_HEIGHT)) / const.RESL)
+
         for i in range(const.FIRST_LASER, const.LAST_LASER + 1):
             angLaser = 0.0083 #Verify!
             if rangeLaser[i] < (const.RANGE_MAX * const.RANGE_LIMIT):
@@ -74,13 +79,13 @@ def refreshGrid(idRobot, globalMap):
             #Defining the points of laser detection
             xL = rangePoint[i][const.X_COORD]
             yL = rangePoint[i][const.Y_COORD]
-            zL = rangePoint[i][const.Z_COORD]
 
+            yL = yL * (-1)
             #Adjusting the map's borders
             #if ((xL == 0) and (yL == 0) and (zL == 0)):
 
-            xL = ((math.cos(angLaser + thetaAngle) * rangeLaser[i]) / const.RESL) + posX 
-            yL = ((math.sin(angLaser + thetaAngle) * rangeLaser[i]) / const.RESL) + posY 
+            xL = ((math.cos(angLaser + thetaAngle) * rangeLaser[i]) / const.RESL) + posX
+            yL = ((math.sin(angLaser + thetaAngle) * rangeLaser[i]) / const.RESL) + posY
 
             #else:
             #    xL = xL / const.RESL
@@ -117,6 +122,7 @@ def refreshGrid(idRobot, globalMap):
             error = deltaX - deltaY
 
             while True:
+                #print("xL = %i, yL = %i" % (int(xL), int(yL)))
                 auxOC = globalMap.getGlobalMapOccupancyGrid(int(xL), int(yL))
                 globalMap.setGlobalMapOccupancyGrid(int(xL), int(yL), 1 - pow((1 + (rateOC / (1 - rateOC)) * ((1 - const.PRIORI) / const.PRIORI) * (auxOC / ((1 - auxOC) + 0.00001))), -1) + 0.00001)
                 globalMap.setGlobalMapVisit(int(xL), int(yL))
@@ -126,7 +132,7 @@ def refreshGrid(idRobot, globalMap):
                 else:
                     rateOC = rateOC * 0.95
 
-                if (int(xL) == int(posX)) and (int(yL) == int(posY)):
+                if (abs(xL - posX) <= 2) and (abs(yL - posY) <= 2):
                     break
 
                 error2 = 2 * error
