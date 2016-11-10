@@ -24,9 +24,6 @@ class GlobalMap:
     def setGlobalMapOccupancyGrid(self, x, y, prob):
         if ((x >= 0) and (y >= 0) and (x < const.MAP_WIDTH) and (y < const.MAP_HEIGHT)):
             self.cellMap[(y * const.MAP_WIDTH) + x].occupancyGrid = prob
-            return 0
-        else:
-            return -1
 
     def getGlobalMapOccupancyGrid(globalMap, x, y):
         auxOccupancyGrid = globalMap.cellMap[(y * const.MAP_WIDTH) + x].occupancyGrid
@@ -35,9 +32,6 @@ class GlobalMap:
     def setGlobalMapVisit(self, x, y):
         if ((x >= 0) and (y >= 0) and (x < const.MAP_WIDTH) and (y < const.MAP_HEIGHT)):
             self.cellMap[(y * const.MAP_WIDTH) + x].visit = 1
-            return 0
-        else:
-            return -1
 
 
         
