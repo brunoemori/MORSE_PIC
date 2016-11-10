@@ -14,7 +14,10 @@ RANGE_MAX = 10 #Maximum reach of the robot's sensor
 RANGE_LIMIT = 0.6 #Verify!
 
 #Map constants
-MAP_WIDTH = 375
-MAP_HEIGHT = 200 
+MAP_WIDTH = 562
+MAP_HEIGHT = 562 
 RESL = 0.08 #Map resolution
 PRIORI = 0.5
+
+HALF_REALMAP_WIDTH = 22.5
+HALF_REALMAP_HEIGHT = 22.5
