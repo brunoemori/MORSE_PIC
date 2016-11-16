@@ -1,11 +1,10 @@
 from pymorse import Morse
-import random
+import time
 
 def isCloseRight(sick_stream):
-		listRange = sick_stream.get()
+    listRange = sick_stream.get()
     rangeValues = listRange['range_list']
-    rightSensorLen = int(len(rangeValues) / 2)
-    for i in range(0, rightSensorLen):
+    for i in range(120, 180):
         if rangeValues[i] < 3:
             return True
         else:
@@ -14,9 +13,17 @@ def isCloseRight(sick_stream):
 def isCloseLeft(sick_stream):
     listRange = sick_stream.get()
     rangeValues = listRange['range_list']
-    leftSensorLen = int(len(rangeValues) / 2)
-    for i in range(len(rangeValues) - 1, leftSensorLen , -1):
+    for i in range(240, 180, -1):
         if rangeValues[i] < 3:
+            return True
+        else:
+            return False
+
+def isCloseFront(sick_stream):
+    listRange = sick_stream.get()
+    rangeValues = listRange['range_list']
+    for i in range(150, 211):
+        if rangeValues[i] < 2:
             return True
         else:
             return False
@@ -39,13 +46,16 @@ def main():
         while True:
             sensorRight = isCloseRight(robotSick)
             sensorLeft = isCloseLeft(robotSick)
-            if (sensorRight and sensorLeft):
-                v_w = {"v": 1, "w": 2}
-            elif sensorRight:
-                v_w = {"v": 1, "w": 2}
-    	      elif sensorLeft:
-                v_w = {"v": 1, "w": 2}
+            #sensorFront = isCloseFront(robotSick)
+            #if sensorFront:
+               # v_w = {"v": -1, "w": -1}
+            if sensorRight:
+                v_w = {"v": 1, "w": 0.7}
+            elif sensorLeft:
+                v_w = {"v": 1, "w": -0.7}
             else:
-                v_w = {"v": 2, "w": 0}
+                v_w = {"v": 1, "w": 0}
             motion.publish(v_w)
-main()
+
+if __name__ == "__main__":
+    main()
