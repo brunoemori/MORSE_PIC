@@ -8,6 +8,12 @@ for i in range(const.MAP_HEIGHT * const.MAP_WIDTH):
     mapObj = mapDef.MapCell()
     simMapCell.append(mapObj)
 
+angLaser = [(math.pi / 2) * (-1)]
+
+for count in range(1, 361):
+    aux = angLaser[count - 1] + 0.00872
+    angLaser.append(aux)
+
 #Global map 
 simGlobalMap = mapDef.GlobalMap(simMapCell)
 
@@ -49,8 +55,7 @@ def printVisitMap(globalMap, mapWidth, mapHeight):
         mapFile.write("%i " % globalMap.cellMap[i].visit)
     mapFile.close()
 
-
-def refreshGrid(idRobot, globalMap): 
+def refreshGrid(idRobot, globalMap, angLaser): 
     #posX and posY are the coordinates of the robot;
     #thetaAngle is the angle (radians) of the robot relative to the world
 
@@ -64,13 +69,13 @@ def refreshGrid(idRobot, globalMap):
         posX = getPosePositionX(idRobot.pose)
         posY = getPosePositionY(idRobot.pose)
 
-        print("(Not converted) X = %i, Y = %i" % (posX, posY))
-
+        #print("(Not converted) X = %i, Y = %i" % (posX, posY))
+        
+        #Converting the world's coordinates to map's coordinate
         posX = int((posX + (const.HALF_REALMAP_WIDTH))  / const.RESL)
         posY = int((posY + (const.HALF_REALMAP_HEIGHT)) / const.RESL)
 
         for i in range(const.FIRST_LASER, const.LAST_LASER + 1):
-            angLaser = 0.0083 #Verify!
             if rangeLaser[i] < (const.RANGE_MAX * const.RANGE_LIMIT):
                 rateOC = 0.9
             else:
@@ -84,8 +89,8 @@ def refreshGrid(idRobot, globalMap):
             #Adjusting the map's borders
             #if ((xL == 0) and (yL == 0) and (zL == 0)):
 
-            xL = ((math.cos(angLaser + thetaAngle) * rangeLaser[i]) / const.RESL) + posX
-            yL = ((math.sin(angLaser + thetaAngle) * rangeLaser[i]) / const.RESL) + posY
+            xL = ((math.cos(angLaser[i] + thetaAngle) * rangeLaser[i]) / const.RESL) + posX
+            yL = ((math.sin(angLaser[i] + thetaAngle) * rangeLaser[i]) / const.RESL) + posY
 
             #else:
             #    xL = xL / const.RESL
@@ -149,9 +154,10 @@ def main():
     with Morse() as morse:
         #Returns the list of robots used in the simulation
         listRobots = morse.rpc('simulation', 'list_robots')
+        #print(angLaser)
 
-        refreshGrid(morse.robot1, simGlobalMap)
-
+        refreshGrid(morse.robot1, simGlobalMap, angLaser)
+        
         printOccupancyGridMap(simGlobalMap, const.MAP_WIDTH, const.MAP_HEIGHT)
         printVisitMap(simGlobalMap, const.MAP_WIDTH, const.MAP_HEIGHT)
 
