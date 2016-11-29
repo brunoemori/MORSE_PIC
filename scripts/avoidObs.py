@@ -39,33 +39,25 @@ def getDir(sick_stream):
             dirPos = i
     return i
 
-def main():
-    with Morse() as morse:
-        motion = morse.robot1.motion
-        robotSick = morse.robot1.sick
-        decision = 0 #0 = Right, 1 = Left
-        while True:
-            sensorRight = isCloseRight(robotSick)
-            sensorLeft = isCloseLeft(robotSick)
-            sensorFront = isCloseFront(robotSick)
-            if sensorFront:
-                if sensorRight:
-                    v_w = {"v": -1, "w": 0.7}
-                elif sensorLeft: 
-                    v_w = {"v": -1, "w": -0.7}
-                elif decision == 0:
-                    v_w = {"v": 1, "w": -0.7}
-                    decision = 1
-                elif decision == 1:
-                    v_w = {"v": 1, "w": 0.7}
-                    decision = 0
-            elif sensorRight:
-                v_w = {"v": 1, "w": 0.7}
-            elif sensorLeft:
-                v_w = {"v": 1, "w": -0.7}
-            else:
-                v_w = {"v": 1, "w": 0}
-            motion.publish(v_w)
-
-if __name__ == "__main__":
-    main()
+def navigate(idRobot, robotSick, robotMotion, robotDecision):
+    sensorRight = isCloseRight(robotSick)
+    sensorLeft = isCloseLeft(robotSick)
+    sensorFront = isCloseFront(robotSick)
+    if sensorFront:
+        if sensorRight:
+            v_w = {"v": -1, "w": 0.7}
+        elif sensorLeft: 
+            v_w = {"v": -1, "w": -0.7}
+        elif decision == 0:
+            v_w = {"v": 1, "w": -0.7}
+            robotDecision = 1
+        elif decision == 1:
+            v_w = {"v": 1, "w": 0.7}
+            robotDecision = 0
+    elif sensorRight:
+        v_w = {"v": 1, "w": 0.7}
+    elif sensorLeft:
+        v_w = {"v": 1, "w": -0.7}
+    else:
+        v_w = {"v": 1, "w": 0}
+    robotMotion.publish(v_w)
