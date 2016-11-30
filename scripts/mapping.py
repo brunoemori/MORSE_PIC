@@ -19,7 +19,7 @@ for count in range(1, 361):
 simGlobalMap = mapDef.GlobalMap(simMapCell)
 
 def stopRobot(idRobot):
-    motion = idRobot.motion
+    motion = idRobot.motion1
     v_w = {"v": 0, "w": 0}
     motion.publish(v_w)
     print("Robot stopped.")
@@ -47,19 +47,21 @@ def getPosePositionY(poseStream):
 def printOccupancyGridMap(globalMap, mapWidth, mapHeight):
     mapFile = open('occupancy_grid_map', 'w')
     for i in range(mapWidth * mapHeight):
-        if ((i + 1) % (mapWidth + 1) == 0):
+        mapFile.write("%.2f " % globalMap.cellMap[i].occupancyGrid)
+
+        if ((i + 1) % mapWidth == 0):
             mapFile.write("\n")
 
-        mapFile.write("%.2f " % globalMap.cellMap[i].occupancyGrid)
     mapFile.close()
 
 def printVisitMap(globalMap, mapWidth, mapHeight):
     mapFile = open('visit_map', 'w')
     for i in range(mapWidth * mapHeight):
-        if ((i + 1) % (mapWidth + 1) == 0):
+        mapFile.write("%i " % globalMap.cellMap[i].visit)
+
+        if ((i + 1) % mapWidth == 0):
             mapFile.write("\n")
 
-        mapFile.write("%i " % globalMap.cellMap[i].visit)
     mapFile.close()
 
 def refreshGrid(idRobot, globalMap, angLaser): 
@@ -68,12 +70,12 @@ def refreshGrid(idRobot, globalMap, angLaser):
 
     borderLeft = borderRight = borderSup = borderInf = 0
     #Borders of each robots' map
-    rangeLaser = getSickRangeList(idRobot.sick)
-    rangePoint = getSickPointList(idRobot.sick)
+    rangeLaser = getSickRangeList(idRobot.sick1)
+    rangePoint = getSickPointList(idRobot.sick1)
 
-    thetaAngle = getPoseYaw(idRobot.pose)
-    posX = getPosePositionX(idRobot.pose)
-    posY = getPosePositionY(idRobot.pose)
+    thetaAngle = getPoseYaw(idRobot.pose1)
+    posX = getPosePositionX(idRobot.pose1)
+    posY = getPosePositionY(idRobot.pose1)
 
     #print("(Not converted) X = %i, Y = %i" % (posX, posY))
         
@@ -136,7 +138,7 @@ def refreshGrid(idRobot, globalMap, angLaser):
             #print("xL = %i, yL = %i" % (int(xL), int(yL)))
             auxOC = globalMap.getGlobalMapOccupancyGrid(int(xL), int(yL))
             globalMap.setGlobalMapOccupancyGrid(int(xL), int(yL), 1 - pow((1 + (rateOC / (1 - rateOC)) * ((1 - const.PRIORI) / const.PRIORI) * (auxOC / ((1 - auxOC) + 0.00001))), -1) + 0.00001)
-            globalMap.setGlobalMapVisit(int(xL), int(yL))
+            globalMap.setGlobalMapVisit(int(posX), int(posY))
 
             if (rateOC > 0.5):
                 rateOC = 0.48
@@ -162,8 +164,8 @@ def main():
         listRobots = morse.rpc('simulation', 'list_robots')
         #print(angLaser)
 
-        motion1 = morse.robot1.motion
-        sick1 = morse.robot1.sick
+        motion1 = morse.robot1.motion1
+        sick1 = morse.robot1.sick1
 
         iterations =  decision = 0
         while iterations < 100:
@@ -171,6 +173,7 @@ def main():
             iterations = iterations + 1
             avoidObs.navigate(morse.robot1, sick1, motion1, decision)
             refreshGrid(morse.robot1, simGlobalMap, angLaser)
+            setarMatrizPath(morse.robot1.pose.)
         
         stopRobot(morse.robot1)
         print("Simulation complete.")
