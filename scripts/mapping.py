@@ -138,7 +138,11 @@ def refreshGrid(idRobot, globalMap, angLaser):
             #print("xL = %i, yL = %i" % (int(xL), int(yL)))
             auxOC = globalMap.getGlobalMapOccupancyGrid(int(xL), int(yL))
             globalMap.setGlobalMapOccupancyGrid(int(xL), int(yL), 1 - pow((1 + (rateOC / (1 - rateOC)) * ((1 - const.PRIORI) / const.PRIORI) * (auxOC / ((1 - auxOC) + 0.00001))), -1) + 0.00001)
-            globalMap.setGlobalMapVisit(int(posX), int(posY))
+            #TODO:
+            #if (globalMap.getGlobalMapVisit(int(xL),int(yL)) == -1):    
+            #    globalMap.setGlobalMapPheromone(int(posX),int(posY),int(xL),int(yL)))
+
+            #globalMap.setGlobalMapVisit(int(xL), int(yL))           
 
             if (rateOC > 0.5):
                 rateOC = 0.48
