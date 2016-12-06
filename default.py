@@ -10,7 +10,7 @@ robot1.append(motion1)
 #robot2.append(motion2)
 
 robot1.translate(x = 0, y = 0)
-#robot2.translate(x = 0, y = 0, z = 3.14)
+#robot2.translate(x = 0, y = 0, z = 3.1415)
 
 sick1 = Sick()
 sick1.properties(laser_range = 10)
