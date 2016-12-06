@@ -21,3 +21,6 @@ PRIORI = 0.5
 
 HALF_REALMAP_WIDTH = 22.5
 HALF_REALMAP_HEIGHT = 22.5
+
+DISP_RATE = 1 # To be defined
+EVAP_RATE = 1 #To be defined
