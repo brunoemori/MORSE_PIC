@@ -64,6 +64,14 @@ def printVisitMap(globalMap, mapWidth, mapHeight):
 
     mapFile.close()
 
+def printPathMap(globalMap, mapWidth, mapHeight):
+    mapFile = open('path_map', 'w')
+    for i in range(mapWidth * mapHeight):
+        mapFile.write("%i " % globalMap.cellMap[i].rPath)
+
+        if ((i + 1) % mapWidth == 0):
+            mapFile.write("\n")
+
 def refreshGrid(idRobot, globalMap, angLaser): 
     #posX and posY are the coordinates of the robot;
     #thetaAngle is the angle (radians) of the robot relative to the world
@@ -134,15 +142,17 @@ def refreshGrid(idRobot, globalMap, angLaser):
 
         error = deltaX - deltaY
 
+
         while True:
             #print("xL = %i, yL = %i" % (int(xL), int(yL)))
+
             auxOC = globalMap.getGlobalMapOccupancyGrid(int(xL), int(yL))
             globalMap.setGlobalMapOccupancyGrid(int(xL), int(yL), 1 - pow((1 + (rateOC / (1 - rateOC)) * ((1 - const.PRIORI) / const.PRIORI) * (auxOC / ((1 - auxOC) + 0.00001))), -1) + 0.00001)
-            #TODO:
+            
             #if (globalMap.getGlobalMapVisit(int(xL),int(yL)) == -1):    
-            #    globalMap.setGlobalMapPheromone(int(posX),int(posY),int(xL),int(yL)))
+                #globalMap.setGlobalMapPheromone(int(posX),int(posY),int(xL),int(yL))
 
-            #globalMap.setGlobalMapVisit(int(xL), int(yL))           
+            globalMap.setGlobalMapVisit(int(xL), int(yL))           
 
             if (rateOC > 0.5):
                 rateOC = 0.48
@@ -170,20 +180,29 @@ def main():
 
         motion1 = morse.robot1.motion1
         sick1 = morse.robot1.sick1
+        pose1 = morse.robot1.pose1
 
         iterations =  decision = 0
         while iterations < 100:
             print("Iteration: %i" % iterations)
             iterations = iterations + 1
             avoidObs.navigate(morse.robot1, sick1, motion1, decision)
+
+            newPosX = getPosePositionX(pose1)
+            newPosY = getPosePositionY(pose1)
+            newPosX = int((newPosX + (const.HALF_REALMAP_WIDTH))  / const.RESL)
+            newPosY = int((newPosY + (const.HALF_REALMAP_HEIGHT)) / const.RESL)
+            simGlobalMap.setGlobalMapRobotPath(newPosX, newPosY)
+
             refreshGrid(morse.robot1, simGlobalMap, angLaser)
-            setarMatrizPath(morse.robot1.pose.)
+
         
         stopRobot(morse.robot1)
         print("Simulation complete.")
         
         printOccupancyGridMap(simGlobalMap, const.MAP_WIDTH, const.MAP_HEIGHT)
         printVisitMap(simGlobalMap, const.MAP_WIDTH, const.MAP_HEIGHT)
+        printPathMap(simGlobalMap, const.MAP_WIDTH, const.MAP_HEIGHT)
 
         print("Maps generated for %i iterations." % iterations)
 
