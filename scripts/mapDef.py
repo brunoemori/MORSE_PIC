@@ -26,6 +26,10 @@ class GlobalMap:
         auxOccupancyGrid = globalMap.cellMap[((const.MAP_WIDTH - 1 - y) * const.MAP_WIDTH) + x].occupancyGrid
         return auxOccupancyGrid
 
+    def getGlobalMapVisit(globalMap, x, y):
+        auxVisit = globalMap.cellMap[((const.MAP_WIDTH - 1 - y) * const.MAP_WIDTH) + x].visit
+        return auxVisit
+
     def setGlobalMapOccupancyGrid(self, x, y, prob):
         if ((x >= 0) and (y >= 0) and (x < const.MAP_WIDTH) and (y < const.MAP_HEIGHT)):
             self.cellMap[((const.MAP_WIDTH - 1 - y) * const.MAP_WIDTH) + x].occupancyGrid = prob
@@ -40,17 +44,20 @@ class GlobalMap:
             self.cellMap[((const.MAP_WIDTH - 1 - y) * const.MAP_WIDTH) + x].rPath = 1
 
     def setGlobalMapPheromone(self, posX, posY, xL, yL):
-        if ((x >= 0) and (y >= 0) and (x < const.MAP_WIDTH) and (y < const.MAP_HEIGHT)):
-            currentPhQuant = self.cellMap[((const.MAP_WIDTH - 1 - y) * const.MAP_WIDTH) + x].qPheromone
-            intensityPh1 = exp(- (xL - posX) * (xL - posX) / const.DISP_RATE) * exp(- (y - posY) / DISP_RATE)
+        if ((xL >= 0) and (yL >= 0) and (xL < const.MAP_WIDTH) and (yL < const.MAP_HEIGHT)):
+            currentPhQuant = self.cellMap[((const.MAP_WIDTH - 1 - yL) * const.MAP_WIDTH) + xL].qPheromone
+            intensityPh1 = math.exp(- (xL - posX) * (xL - posX) / const.DISP_RATE) * math.exp(- (yL - posY) * (yL - posY) / const.DISP_RATE)
             remain = 1 - currentPhQuant
 
             intensityPh2 = intensityPh1 * remain
-            self.cellMap[((const.MAP_WIDTH - 1 - y) * const.MAP_WIDTH) + x].qPheromone = currentQuant + intensityPh2
+            self.cellMap[((const.MAP_WIDTH - 1 - yL) * const.MAP_WIDTH) + xL].qPheromone = currentPhQuant + intensityPh2
 
-    def evaporatePheromon(self):
-        for x in range(self.borderLeft, self.borderRight):
-            for y in range(self.borderInf, self.borderSup):
-                currentPhQuant = self.cellMap[((const.MAP_WIDTH - 1 - y) * const.MAP_WIDTH) + x].qPheromone
-                self.cellMap[((const.MAP_WIDTH - 1 - y) * const.MAP_WIDTH) + x].qPheromone = (1 - const.EVAP_RATE) * currentPhQuant
+    def evaporatePheromone(self):
+        for i in range(const.MAP_WIDTH * const.MAP_HEIGHT):
+            currentPhQuant = self.cellMap[i].qPheromone
+            self.cellMap[i].qPheromone = (1 - const.EVAP_RATE) * currentPhQuant
+
+    def resetGlobaMapVisit(self):
+        for i in range(const.MAP_WIDTH * const.MAP_HEIGHT):
+            self.cellMap[i].visit = -1
 
