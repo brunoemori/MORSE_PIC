@@ -48,7 +48,7 @@ def navigate(idRobot, robotSick, robotMotion, robotDecision):
             v_w = {"v": -1, "w": 0.7}
         elif sensorLeft: 
             v_w = {"v": -1, "w": -0.7}
-        elif decision == 0:
+        elif robotDecision == 0:
             v_w = {"v": 1, "w": -0.7}
             robotDecision = 1
         elif decision == 1:
@@ -60,4 +60,5 @@ def navigate(idRobot, robotSick, robotMotion, robotDecision):
         v_w = {"v": 1, "w": -0.7}
     else:
         v_w = {"v": 1, "w": 0}
+
     robotMotion.publish(v_w)
