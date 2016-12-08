@@ -45,7 +45,7 @@ def getPosePositionY(poseStream):
     return robotPositionX['y']
 
 def printOccupancyGridMap(globalMap, mapWidth, mapHeight):
-    mapFile = open('occupancy_grid_map', 'w')
+    mapFile = open('occupancy_grid_map.txt', 'w')
     for i in range(mapWidth * mapHeight):
         mapFile.write("%.2f " % globalMap.cellMap[i].occupancyGrid)
 
@@ -55,7 +55,7 @@ def printOccupancyGridMap(globalMap, mapWidth, mapHeight):
     mapFile.close()
 
 def printVisitMap(globalMap, mapWidth, mapHeight):
-    mapFile = open('visit_map', 'w')
+    mapFile = open('visit_map.txt', 'w')
     for i in range(mapWidth * mapHeight):
         mapFile.write("%i " % globalMap.cellMap[i].visit)
 
@@ -65,12 +65,21 @@ def printVisitMap(globalMap, mapWidth, mapHeight):
     mapFile.close()
 
 def printPathMap(globalMap, mapWidth, mapHeight):
-    mapFile = open('path_map', 'w')
+    mapFile = open('path_map.txt', 'w')
     for i in range(mapWidth * mapHeight):
         mapFile.write("%i " % globalMap.cellMap[i].rPath)
 
         if ((i + 1) % mapWidth == 0):
             mapFile.write("\n")
+
+def printPheromoneMap(globalMap, mapWidth, mapHeight):
+    mapFile = open('pheromone_map.txt', 'w')
+    for i in range(mapWidth * mapHeight):
+        mapFile.write("%.5f " % globalMap.cellMap[i].qPheromone)
+
+        if ((i + 1) % mapWidth == 0):
+            mapFile.write("\n")
+
 
 def refreshGrid(idRobot, globalMap, angLaser): 
     #posX and posY are the coordinates of the robot;
@@ -127,7 +136,7 @@ def refreshGrid(idRobot, globalMap, angLaser):
         if (borderSup > const.MAP_HEIGHT): yL = borderSup = const.MAP_HEIGHT
         if (borderInf < 0): yL = borderInf = 0
 
-        globalMap.setGlobalMapBorders(borderLeft, borderRight, borderInf, borderSup) 
+        globalMap.setGlobalMapBorders(int(borderLeft), int(borderRight), int(borderInf), int(borderSup))
 
         deltaX = abs(xL - posX)
         deltaY = abs(yL - posY)
@@ -145,12 +154,11 @@ def refreshGrid(idRobot, globalMap, angLaser):
 
         while True:
             #print("xL = %i, yL = %i" % (int(xL), int(yL)))
-
             auxOC = globalMap.getGlobalMapOccupancyGrid(int(xL), int(yL))
             globalMap.setGlobalMapOccupancyGrid(int(xL), int(yL), 1 - pow((1 + (rateOC / (1 - rateOC)) * ((1 - const.PRIORI) / const.PRIORI) * (auxOC / ((1 - auxOC) + 0.00001))), -1) + 0.00001)
             
-            #if (globalMap.getGlobalMapVisit(int(xL),int(yL)) == -1):    
-                #globalMap.setGlobalMapPheromone(int(posX),int(posY),int(xL),int(yL))
+            if (globalMap.getGlobalMapVisit(int(xL),int(yL)) == -1):    
+                globalMap.setGlobalMapPheromone(int(posX), int(posY), int(xL), int(yL))
 
             globalMap.setGlobalMapVisit(int(xL), int(yL))           
 
@@ -182,6 +190,10 @@ def main():
         sick1 = morse.robot1.sick1
         pose1 = morse.robot1.pose1
 
+        motion2 = morse.robot2.motion2
+        sick2 = morse.robot2.sick2
+        pose2 = morse.robot2.pose2
+
         iterations =  decision = 0
         while iterations < 100:
             print("Iteration: %i" % iterations)
@@ -195,7 +207,8 @@ def main():
             simGlobalMap.setGlobalMapRobotPath(newPosX, newPosY)
 
             refreshGrid(morse.robot1, simGlobalMap, angLaser)
-
+            simGlobalMap.evaporatePheromone()
+            simGlobalMap.resetGlobaMapVisit()
         
         stopRobot(morse.robot1)
         print("Simulation complete.")
@@ -203,6 +216,7 @@ def main():
         printOccupancyGridMap(simGlobalMap, const.MAP_WIDTH, const.MAP_HEIGHT)
         printVisitMap(simGlobalMap, const.MAP_WIDTH, const.MAP_HEIGHT)
         printPathMap(simGlobalMap, const.MAP_WIDTH, const.MAP_HEIGHT)
+        printPheromoneMap(simGlobalMap, const.MAP_WIDTH, const.MAP_HEIGHT)
 
         print("Maps generated for %i iterations." % iterations)
 
