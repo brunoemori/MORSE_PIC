@@ -2,8 +2,6 @@ from pymorse import Morse
 import const
 import mapDef
 import math
-import avoidObs
-
 simMapCell = []
 for i in range(const.MAP_HEIGHT * const.MAP_WIDTH):
     mapObj = mapDef.MapCell()
