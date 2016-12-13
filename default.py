@@ -1,4 +1,14 @@
 from morse.builder import *
+from scripts import const
+
+simMapVisit1 = []
+for i in range(const.MAP_HEIGHT * const.MAP_WIDTH):
+    simMapVisit1.append(-1)
+
+simMapVisit2 = []
+for i in range(const.MAP_HEIGHT * const.MAP_WIDTH):
+    simMapVisit2.append(-1)
+
 
 robot1 = ATRV()
 robot2 = ATRV()
@@ -8,6 +18,9 @@ motion2 = MotionVW()
 
 robot1.append(motion1)
 robot2.append(motion2)
+
+setattr(robot1, "visitMap", simMapVisit1)
+setattr(robot2, "visitMap", simMapVisit2)
 
 robot1.translate(x = 0, y = 0)
 robot2.translate(x = -3, y = 0)
