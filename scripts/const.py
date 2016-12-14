@@ -19,8 +19,21 @@ MAP_HEIGHT = 562
 RESL = 0.08 #Map resolution
 PRIORI = 0.5
 
+'''
+MAP_WIDTH = realmap_width / res
+MAP_HEIGHT = realmap_height / res
+'''
+
+#Divide by 2 the realmap dimensions
 HALF_REALMAP_WIDTH = 22.5
 HALF_REALMAP_HEIGHT = 22.5
 
 DISP_RATE = 1225
 EVAP_RATE = 0.01
+
+
+'''
+For 100x100m and resolution = 0.08
+    MAP_WIDTH = 562
+    MAP_HEIGHT = 562
+'''
