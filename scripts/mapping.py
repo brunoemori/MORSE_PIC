@@ -2,6 +2,7 @@ from pymorse import Morse
 import const
 import mapDef
 import math
+
 simMapCell = []
 for i in range(const.MAP_HEIGHT * const.MAP_WIDTH):
     mapObj = mapDef.MapCell()
@@ -17,7 +18,7 @@ for count in range(1, 361):
 simGlobalMap = mapDef.GlobalMap(simMapCell)
 
 def stopRobot(idRobot):
-    motion = idRobot.motion1
+    motion = idRobot.motion
     v_w = {"v": 0, "w": 0}
     motion.publish(v_w)
     print("Robot stopped.")
@@ -85,12 +86,12 @@ def refreshGrid(idRobot, globalMap, angLaser):
 
     borderLeft = borderRight = borderSup = borderInf = 0
     #Borders of each robots' map
-    rangeLaser = getSickRangeList(idRobot.sick1)
-    rangePoint = getSickPointList(idRobot.sick1)
+    rangeLaser = getSickRangeList(idRobot.sick)
+    rangePoint = getSickPointList(idRobot.sick)
 
-    thetaAngle = getPoseYaw(idRobot.pose1)
-    posX = getPosePositionX(idRobot.pose1)
-    posY = getPosePositionY(idRobot.pose1)
+    thetaAngle = getPoseYaw(idRobot.pose)
+    posX = getPosePositionX(idRobot.pose)
+    posY = getPosePositionY(idRobot.pose)
 
     #print("(Not converted) X = %i, Y = %i" % (posX, posY))
         
@@ -184,13 +185,13 @@ def main():
         listRobots = morse.rpc('simulation', 'list_robots')
         #print(angLaser)
 
-        motion1 = morse.robot1.motion1
-        sick1 = morse.robot1.sick1
-        pose1 = morse.robot1.pose1
+        motion1 = morse.robot1.motion
+        sick1 = morse.robot1.sick
+        pose1 = morse.robot1.pose
 
-        motion2 = morse.robot2.motion2
-        sick2 = morse.robot2.sick2
-        pose2 = morse.robot2.pose2
+        motion2 = morse.robot2.motion
+        sick2 = morse.robot2.sick
+        pose2 = morse.robot2.pose
 
         iterations =  decision = 0
         while iterations < 100:
