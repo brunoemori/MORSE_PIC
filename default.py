@@ -1,5 +1,6 @@
 from morse.builder import *
 from scripts import const
+from scripts import mapDef
 
 #Defining robots
 names = ["robot1", "robot2"]
@@ -8,9 +9,12 @@ for i in range(len(names)):
     robot = ATRV(names[i])
 
     #Defining components
-    mapVisit = []
+    localMapCell = []
     for j in range(const.MAP_HEIGHT * const.MAP_WIDTH):
-        mapVisit.append(-1)
+        cell = mapDef.MapCell()
+        localMapCell.append(cell)
+
+    localMap = mapDef.GlobalMap(localMapCell)
 
     motion = MotionVW()
 
@@ -26,7 +30,7 @@ for i in range(len(names)):
     robot.append(sick)
     robot.append(motion)
     robot.append(pose)
-    setattr(robot, "visitMap", mapVisit)
+    setattr(robot, "localMap", localMap)
 
     sick.add_interface('socket')
     motion.add_interface('socket')
