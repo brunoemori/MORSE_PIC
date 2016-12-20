@@ -1,4 +1,4 @@
-import const
+from scripts import const
 import math
 
 class MapCell:
