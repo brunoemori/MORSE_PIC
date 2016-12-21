@@ -39,7 +39,9 @@ def getDir(sick_stream):
             dirPos = i
     return i
 
-def navigate(idRobot, robotSick, robotMotion, robotDecision):
+def navigate(idRobot):
+    robotSick = idRobot.sick
+    robotMotion = idRobot.motion
     sensorRight = isCloseRight(robotSick)
     sensorLeft = isCloseLeft(robotSick)
     sensorFront = isCloseFront(robotSick)
