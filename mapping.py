@@ -191,25 +191,18 @@ def main():
 
         setSimulation.setRobots(morse, listRobots)
 
-        if(hasattr(morse.robot1, "localMap")):
-            print("Has 1")
-        if(hasattr(morse.robot2, "localMap")):
-            print("Has 2")
-
-
-        '''
         iterations =  decision = 0
         while iterations < 100:
             print("Iteration: %i" % iterations)
             iterations = iterations + 1
-            
+
             #Iterate for each robot in the simulation
             for robotName in listRobots:
                 currentRobot = getattr(morse, robotName) #Returns the robot object by its name on the list
                 sick = currentRobot.sick
                 motion = currentRobot.motion
                 pose = currentRobot.pose
-                avoidObs.navigate(currentRobot, sick, motion, decision)
+                avoidObs.navigate(currentRobot)
 
                 newPosX = getPosePositionX(pose)
                 newPosY = getPosePositionY(pose)
@@ -218,6 +211,7 @@ def main():
                 simGlobalMap.setGlobalMapRobotPath(newPosX, newPosY)
 
                 refreshGrid(currentRobot, simGlobalMap, angLaser)
+                stopRobot(currentRobot)
                 simGlobalMap.evaporatePheromone()
                 #simGlobalMap.resetGlobalMapVisit()
                 currentRobot.localMap.resetGlobalMapVisit()        
@@ -240,6 +234,6 @@ def main():
 
         print("Maps generated for %i iterations.\n" % iterations)
         print("------ Surveillance ended. -----")
-'''
+
 if __name__ == "__main__":
     main()
