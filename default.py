@@ -9,14 +9,9 @@ for i in range(len(names)):
     robot = ATRV(names[i])
 
     #Defining components
-    localMapCell = []
-    for j in range(const.MAP_HEIGHT * const.MAP_WIDTH):
-        cell = mapDef.MapCell()
-        localMapCell.append(cell)
-
-    localMap = mapDef.GlobalMap(localMapCell)
-
     motion = MotionVW()
+
+    teleport = Teleport()
 
     sick = Sick()
     sick.properties(laser_range = 10)
@@ -30,15 +25,18 @@ for i in range(len(names)):
     robot.append(sick)
     robot.append(motion)
     robot.append(pose)
-    setattr(robot, "localMap", localMap)
+    robot.append(teleport)
 
     sick.add_interface('socket')
     motion.add_interface('socket')
     pose.add_interface('socket')
+    teleport.add_interface('socket')
 
+'''
     if (names[i] == "robot2"):
         robot.translate(x = -3, y = 0)
         robot.rotate(z = 3.1415)
+'''
 
 #Set enviroment
 env = Environment('indoors-1/boxes')
