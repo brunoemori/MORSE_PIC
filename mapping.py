@@ -2,6 +2,7 @@ from pymorse import Morse
 from scripts import const
 from scripts import mapDef
 from scripts import avoidObs
+from scripts import setSimulation
 import math
 import time
 
@@ -188,8 +189,16 @@ def main():
         #Returns the list of robots used in the simulation
         listRobots = morse.rpc('simulation', 'list_robots')
 
-        iterations =  decision = 0
+        setSimulation.setRobots(morse, listRobots)
 
+        if(hasattr(morse.robot1, "localMap")):
+            print("Has 1")
+        if(hasattr(morse.robot2, "localMap")):
+            print("Has 2")
+
+
+        '''
+        iterations =  decision = 0
         while iterations < 100:
             print("Iteration: %i" % iterations)
             iterations = iterations + 1
@@ -231,6 +240,6 @@ def main():
 
         print("Maps generated for %i iterations.\n" % iterations)
         print("------ Surveillance ended. -----")
-
+'''
 if __name__ == "__main__":
     main()
