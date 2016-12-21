@@ -5,8 +5,8 @@ from scripts import const
 def setRobots(morse, simulationList):
     listRobots = simulationList
 
-    morse.robot2.teleport.translate(-3, 0, 0)
-    morse.robot2.teleport.rotate(0, 0, 3.1415)
+    #morse.robot2.teleport.translate(-3, 0, 0)
+    #morse.robot2.teleport.rotate(0, 0, 3.1415)
 
     for eachRobot in listRobots:
         currentRobot = getattr(morse, eachRobot)
