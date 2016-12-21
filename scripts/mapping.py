@@ -2,6 +2,7 @@ from pymorse import Morse
 import const
 import mapDef
 import math
+import time
 
 simMapCell = []
 for i in range(const.MAP_HEIGHT * const.MAP_WIDTH):
@@ -21,7 +22,6 @@ def stopRobot(idRobot):
     motion = idRobot.motion
     v_w = {"v": 0, "w": 0}
     motion.publish(v_w)
-    print("Robot stopped.")
 
 def getSickRangeList(sickStream):
     sickSensor = sickStream.get()
@@ -159,7 +159,8 @@ def refreshGrid(idRobot, globalMap, angLaser):
             if (globalMap.getGlobalMapVisit(int(xL),int(yL)) == -1):    
                 globalMap.setGlobalMapPheromone(int(posX), int(posY), int(xL), int(yL))
 
-            globalMap.setGlobalMapVisit(int(xL), int(yL))           
+            #globalMap.setGlobalMapVisit(int(xL), int(yL))
+            idRobot.localMap.setGlobalMapVisit(int(xL), int(yL))
 
             if (rateOC > 0.5):
                 rateOC = 0.48
@@ -181,43 +182,54 @@ def refreshGrid(idRobot, globalMap, angLaser):
 
 def main():
     with Morse() as morse:
+        print("Surveillance running...")
+        startingTime = time.time()
         #Returns the list of robots used in the simulation
         listRobots = morse.rpc('simulation', 'list_robots')
-        #print(angLaser)
-
-        motion1 = morse.robot1.motion
-        sick1 = morse.robot1.sick
-        pose1 = morse.robot1.pose
-
-        motion2 = morse.robot2.motion
-        sick2 = morse.robot2.sick
-        pose2 = morse.robot2.pose
 
         iterations =  decision = 0
+
         while iterations < 100:
             print("Iteration: %i" % iterations)
             iterations = iterations + 1
-            avoidObs.navigate(morse.robot1, sick1, motion1, decision)
+            
+            #Iterate for each robot in the simulation
+            for robotName in listRobots:
+                currentRobot = getattr(morse, robotName) #Returns the robot object by its name on the list
+                sick = currentRobot.sick
+                motion = currentRobot.motion
+                pose = currentRobot.pose
+                avoidObs.navigate(currentRobot, sick, motion, decision)
 
-            newPosX = getPosePositionX(pose1)
-            newPosY = getPosePositionY(pose1)
-            newPosX = int((newPosX + (const.HALF_REALMAP_WIDTH))  / const.RESL)
-            newPosY = int((newPosY + (const.HALF_REALMAP_HEIGHT)) / const.RESL)
-            simGlobalMap.setGlobalMapRobotPath(newPosX, newPosY)
+                newPosX = getPosePositionX(pose)
+                newPosY = getPosePositionY(pose)
+                newPosX = int((newPosX + (const.HALF_REALMAP_WIDTH))  / const.RESL)
+                newPosY = int((newPosY + (const.HALF_REALMAP_HEIGHT)) / const.RESL)
+                simGlobalMap.setGlobalMapRobotPath(newPosX, newPosY)
 
-            refreshGrid(morse.robot1, simGlobalMap, angLaser)
-            simGlobalMap.evaporatePheromone()
-            simGlobalMap.resetGlobaMapVisit()
-        
-        stopRobot(morse.robot1)
+                refreshGrid(currentRobot, simGlobalMap, angLaser)
+                simGlobalMap.evaporatePheromone()
+                #simGlobalMap.resetGlobalMapVisit()
+                currentRobot.localMap.resetGlobalMapVisit()        
+
+
+        for robotName in listRobots:
+            currentRobot = getattr(morse, robotName)
+            stopRobot(currentRobot)
+
+        print("---------- SIMULATION SUMMARY ----------")
         print("Simulation complete.")
+        print("Robots used in simulation: ", end = "")
+        print(listRobots)
+        print("Simulation time: %.2f second(s).\n\n" % (time.time() - startingTime))
         
         printOccupancyGridMap(simGlobalMap, const.MAP_WIDTH, const.MAP_HEIGHT)
         printVisitMap(simGlobalMap, const.MAP_WIDTH, const.MAP_HEIGHT)
         printPathMap(simGlobalMap, const.MAP_WIDTH, const.MAP_HEIGHT)
         printPheromoneMap(simGlobalMap, const.MAP_WIDTH, const.MAP_HEIGHT)
 
-        print("Maps generated for %i iterations." % iterations)
+        print("Maps generated for %i iterations.\n" % iterations)
+        print("------ Surveillance ended. -----")
 
 if __name__ == "__main__":
     main()
