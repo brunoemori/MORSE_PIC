@@ -57,7 +57,7 @@ class GlobalMap:
             currentPhQuant = self.cellMap[i].qPheromone
             self.cellMap[i].qPheromone = (1 - const.EVAP_RATE) * currentPhQuant
 
-    def resetGlobaMapVisit(self):
+    def resetGlobalMapVisit(self):
         for i in range(const.MAP_WIDTH * const.MAP_HEIGHT):
             self.cellMap[i].visit = -1
 
