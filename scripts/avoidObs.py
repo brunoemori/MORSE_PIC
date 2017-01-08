@@ -39,7 +39,8 @@ def getDir(sick_stream):
             dirPos = i
     return i
 
-def navigate(idRobot):
+def navigate(idRobot, robotDecision):
+    nextDecision = robotDecision
     robotSick = idRobot.sick
     robotMotion = idRobot.motion
     sensorRight = isCloseRight(robotSick)
@@ -52,10 +53,10 @@ def navigate(idRobot):
             v_w = {"v": -1, "w": -0.7}
         elif robotDecision == 0:
             v_w = {"v": 1, "w": -0.7}
-            robotDecision = 1
-        elif decision == 1:
+            nextDecision = 1
+        elif robotDecision == 1:
             v_w = {"v": 1, "w": 0.7}
-            robotDecision = 0
+            nextDecision = 0
     elif sensorRight:
         v_w = {"v": 1, "w": 0.7}
     elif sensorLeft:
@@ -64,3 +65,4 @@ def navigate(idRobot):
         v_w = {"v": 1, "w": 0}
 
     robotMotion.publish(v_w)
+    return nextDecision
