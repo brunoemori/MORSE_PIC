@@ -185,7 +185,7 @@ def refreshGrid(idRobot, globalMap, angLaser):
 
 def main():
     with Morse() as morse:
-        print("Surveillance running...")
+        print("Simulation running...")
         startingTime = time.time()
         #Returns the list of robots used in the simulation
         listRobots = morse.rpc('simulation', 'list_robots')
@@ -215,6 +215,7 @@ def main():
                 pool = Pool(4)
                 mapping_async = pool.apply_async(refreshGrid, [currentRobot, simGlobalMap, angLaser])
                 pool.close()
+                pool.join()
 
                 #refreshGrid(currentRobot, simGlobalMap, angLaser)
                 #stopRobot(currentRobot)
