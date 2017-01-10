@@ -30,10 +30,6 @@ def getSickRangeList(sickStream):
     sickSensor = sickStream.get()
     return sickSensor['range_list']
 
-def getSickPointList(sickStream):
-    sickSensor = sickStream.get()
-    return sickSensor['point_list']
-
 def getPoseYaw(poseStream):
     robotYaw = poseStream.get()
     return robotYaw['yaw']
@@ -90,7 +86,6 @@ def refreshGrid(idRobot, globalMap, angLaser):
     borderLeft = borderRight = borderSup = borderInf = 0
     #Borders of each robots' map
     rangeLaser = getSickRangeList(idRobot.sick)
-    rangePoint = getSickPointList(idRobot.sick)
 
     thetaAngle = getPoseYaw(idRobot.pose)
     posX = getPosePositionX(idRobot.pose)
@@ -98,7 +93,7 @@ def refreshGrid(idRobot, globalMap, angLaser):
 
     #print("(Not converted) X = %i, Y = %i" % (posX, posY))
         
-    #Converting the world's coordinates to map's coordinate
+    #Converting the world's position to map's position
     posX = int((posX + (const.HALF_REALMAP_WIDTH))  / const.RESL)
     posY = int((posY + (const.HALF_REALMAP_HEIGHT)) / const.RESL)
 
@@ -108,21 +103,10 @@ def refreshGrid(idRobot, globalMap, angLaser):
         else:
             rateOC = 0.48
 
-        #Defining the points of laser detection
-        xL = rangePoint[i][const.X_COORD]
-        yL = rangePoint[i][const.Y_COORD]
-
-        yL = yL * (-1)
-        #Adjusting the map's borders
-        #if ((xL == 0) and (yL == 0) and (zL == 0)):
-
+    #Adjusting the world's coordinates to the global map's coordinates
         xL = ((math.cos(angLaser[i] + thetaAngle) * rangeLaser[i]) / const.RESL) + posX
         yL = ((math.sin(angLaser[i] + thetaAngle) * rangeLaser[i]) / const.RESL) + posY
-
-        #else:
-        #    xL = xL / const.RESL
-        #    yL = yL / const.RESL
-
+    
         if (xL < 0): xL = 0
         if (xL > const.MAP_WIDTH): xL = const.MAP_WIDTH
         if (yL < 0): yL = 0
@@ -155,14 +139,12 @@ def refreshGrid(idRobot, globalMap, angLaser):
 
 
         while True:
-            #print("xL = %i, yL = %i" % (int(xL), int(yL)))
             auxOC = globalMap.getGlobalMapOccupancyGrid(int(xL), int(yL))
             globalMap.setGlobalMapOccupancyGrid(int(xL), int(yL), 1 - pow((1 + (rateOC / (1 - rateOC)) * ((1 - const.PRIORI) / const.PRIORI) * (auxOC / ((1 - auxOC) + 0.00001))), -1) + 0.00001)
             
             if (globalMap.getGlobalMapVisit(int(xL),int(yL)) == -1):    
                 globalMap.setGlobalMapPheromone(int(posX), int(posY), int(xL), int(yL))
 
-            #globalMap.setGlobalMapVisit(int(xL), int(yL))
             idRobot.localMap.setGlobalMapVisit(int(xL), int(yL))
 
             if (rateOC > 0.5):
