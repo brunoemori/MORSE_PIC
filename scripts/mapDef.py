@@ -30,6 +30,10 @@ class GlobalMap:
         auxVisit = globalMap.cellMap[((const.MAP_WIDTH - 1 - y) * const.MAP_WIDTH) + x].visit
         return auxVisit
 
+    def getGlobalMapPheromoneRatio(globalMap, x, y):
+        auxPheromone = globalMap.cellMap[((const.MAP_WIDTH - 1 - y) * const.MAP_WIDTH) + x].qPheromone
+        return auxPheromone
+
     def setGlobalMapOccupancyGrid(self, x, y, prob):
         if ((x >= 0) and (y >= 0) and (x < const.MAP_WIDTH) and (y < const.MAP_HEIGHT)):
             self.cellMap[((const.MAP_WIDTH - 1 - y) * const.MAP_WIDTH) + x].occupancyGrid = prob
