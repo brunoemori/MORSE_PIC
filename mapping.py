@@ -30,10 +30,6 @@ def getSickRangeList(sickStream):
     sickSensor = sickStream.get()
     return sickSensor['range_list']
 
-def getSickPointList(sickStream):
-    sickSensor = sickStream.get()
-    return sickSensor['point_list']
-
 def getPoseYaw(poseStream):
     robotYaw = poseStream.get()
     return robotYaw['yaw']
@@ -89,7 +85,6 @@ def refreshGrid(idRobot, globalMap, angLaser):
     borderLeft = borderRight = borderSup = borderInf = 0
     #Borders of each robots' map
     rangeLaser = getSickRangeList(idRobot.sick)
-    rangePoint = getSickPointList(idRobot.sick)
 
     thetaAngle = getPoseYaw(idRobot.pose)
     posX = getPosePositionX(idRobot.pose)
@@ -97,7 +92,7 @@ def refreshGrid(idRobot, globalMap, angLaser):
 
     #print("(Not converted) X = %i, Y = %i" % (posX, posY))
         
-    #Converting the world's coordinates to map's coordinate
+    #Converting the world's position to map's position
     posX = int((posX + (const.HALF_REALMAP_WIDTH))  / const.RESL)
     posY = int((posY + (const.HALF_REALMAP_HEIGHT)) / const.RESL)
 
@@ -107,21 +102,10 @@ def refreshGrid(idRobot, globalMap, angLaser):
         else:
             rateOC = 0.48
 
-        #Defining the points of laser detection
-        xL = rangePoint[i][const.X_COORD]
-        yL = rangePoint[i][const.Y_COORD]
-
-        yL = yL * (-1)
-        #Adjusting the map's borders
-        #if ((xL == 0) and (yL == 0) and (zL == 0)):
-
+    #Adjusting the world's coordinates to the global map's coordinates
         xL = ((math.cos(angLaser[i] + thetaAngle) * rangeLaser[i]) / const.RESL) + posX
         yL = ((math.sin(angLaser[i] + thetaAngle) * rangeLaser[i]) / const.RESL) + posY
-
-        #else:
-        #    xL = xL / const.RESL
-        #    yL = yL / const.RESL
-
+    
         if (xL < 0): xL = 0
         if (xL > const.MAP_WIDTH): xL = const.MAP_WIDTH
         if (yL < 0): yL = 0
@@ -154,14 +138,12 @@ def refreshGrid(idRobot, globalMap, angLaser):
 
 
         while True:
-            #print("xL = %i, yL = %i" % (int(xL), int(yL)))
             auxOC = globalMap.getGlobalMapOccupancyGrid(int(xL), int(yL))
             globalMap.setGlobalMapOccupancyGrid(int(xL), int(yL), 1 - pow((1 + (rateOC / (1 - rateOC)) * ((1 - const.PRIORI) / const.PRIORI) * (auxOC / ((1 - auxOC) + 0.00001))), -1) + 0.00001)
             
             if (globalMap.getGlobalMapVisit(int(xL),int(yL)) == -1):    
                 globalMap.setGlobalMapPheromone(int(posX), int(posY), int(xL), int(yL))
 
-            #globalMap.setGlobalMapVisit(int(xL), int(yL))
             idRobot.localMap.setGlobalMapVisit(int(xL), int(yL))
 
             if (rateOC > 0.5):
@@ -210,19 +192,57 @@ def robotMapping(robot, globalMap, angLaser):
 
 def main():
     with Morse() as morse:
+<<<<<<< HEAD
         iterations = 100
         print("Simulation started...")
+=======
+        print("Simulation running...")
+>>>>>>> fd659f348f4bbf85bb6c4bd45a4aa1891f32359a
         startingTime = time.time()
         #Returns the list of robots used in the simulation
         listRobots = morse.rpc('simulation', 'list_robots')
 
         localMaps.setLocalMaps(morse, listRobots)
 
+<<<<<<< HEAD
         executor = ThreadPoolExecutor(max_workers=4)
         process1 = executor.submit(robotMapping, morse.robot1, simGlobalMap, angLaser)
         process2 = executor.submit(robotMapping, morse.robot2, simGlobalMap, angLaser)
 
         executor.shutdown()
+=======
+        iterations = 0
+        decision = 0
+        while iterations < 100:
+            print("Iteration: %i" % iterations)
+            iterations = iterations + 1
+
+            #Iterate for each robot in the simulation
+            for robotName in listRobots:
+                currentRobot = getattr(morse, robotName) #Returns the robot object by its name on the list
+                sick = currentRobot.sick
+                motion = currentRobot.motion
+                pose = currentRobot.pose
+                decision = avoidObs.navigate(currentRobot, decision)
+
+                newPosX = getPosePositionX(pose)
+                newPosY = getPosePositionY(pose)
+                newPosX = int((newPosX + (const.HALF_REALMAP_WIDTH))  / const.RESL)
+                newPosY = int((newPosY + (const.HALF_REALMAP_HEIGHT)) / const.RESL)
+                simGlobalMap.setGlobalMapRobotPath(newPosX, newPosY)
+
+                pool = Pool(4)
+                mapping_async = pool.apply_async(refreshGrid, [currentRobot, simGlobalMap, angLaser])
+                pool.close()
+                pool.join()
+
+                #refreshGrid(currentRobot, simGlobalMap, angLaser)
+                #stopRobot(currentRobot)
+                simGlobalMap.evaporatePheromone()
+                #simGlobalMap.resetGlobalMapVisit()
+                currentRobot.localMap.resetGlobalMapVisit()
+                
+>>>>>>> fd659f348f4bbf85bb6c4bd45a4aa1891f32359a
 
         for robotName in listRobots:
             currentRobot = getattr(morse, robotName)
