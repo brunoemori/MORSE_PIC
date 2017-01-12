@@ -1,9 +1,9 @@
 from pymorse import Morse
-from multiprocessing import Pool
 from scripts import const
 from scripts import mapDef
 from scripts import avoidObs
 from scripts import localMaps
+from concurrent.futures import ThreadPoolExecutor
 import math
 import time
 
@@ -81,7 +81,6 @@ def printPheromoneMap(globalMap, mapWidth, mapHeight):
 
         if ((i + 1) % mapWidth == 0):
             mapFile.write("\n")
-
 
 def refreshGrid(idRobot, globalMap, angLaser): 
     #posX and posY are the coordinates of the robot;
@@ -183,45 +182,47 @@ def refreshGrid(idRobot, globalMap, angLaser):
                 error = error + deltaX
                 yL = yL + sY
 
+def test(robot, globalMap, angLaser):
+    i = 0
+    while i < 10:
+        pass
+
+def robotMapping(robot, globalMap, angLaser):
+    iteration = 0
+    decision = 0
+    while iteration < 100:
+        print("Iteration of %s: %i." % (robot.name, iteration))
+        iteration = iteration + 1
+        sick = robot.sick
+        motion = robot.motion
+        pose = robot.pose
+
+        decision = avoidObs.navigate(robot, decision)
+        refreshGrid(robot, globalMap, angLaser)
+
+        newPosX = getPosePositionX(pose)
+        newPosY = getPosePositionY(pose)
+        newPosX = int((newPosX + (const.HALF_REALMAP_WIDTH))  / const.RESL)
+        newPosY = int((newPosY + (const.HALF_REALMAP_HEIGHT)) / const.RESL)
+        simGlobalMap.setGlobalMapRobotPath(newPosX, newPosY)
+
+        robot.localMap.resetGlobalMapVisit()
+
 def main():
     with Morse() as morse:
-        print("Surveillance running...")
+        iterations = 100
+        print("Simulation started...")
         startingTime = time.time()
         #Returns the list of robots used in the simulation
         listRobots = morse.rpc('simulation', 'list_robots')
 
         localMaps.setLocalMaps(morse, listRobots)
 
-        iterations = 0
-        decision = 0
-        while iterations < 100:
-            print("Iteration: %i" % iterations)
-            iterations = iterations + 1
+        executor = ThreadPoolExecutor(max_workers=4)
+        process1 = executor.submit(robotMapping, morse.robot1, simGlobalMap, angLaser)
+        process2 = executor.submit(robotMapping, morse.robot2, simGlobalMap, angLaser)
 
-            #Iterate for each robot in the simulation
-            for robotName in listRobots:
-                currentRobot = getattr(morse, robotName) #Returns the robot object by its name on the list
-                sick = currentRobot.sick
-                motion = currentRobot.motion
-                pose = currentRobot.pose
-                decision = avoidObs.navigate(currentRobot, decision)
-
-                newPosX = getPosePositionX(pose)
-                newPosY = getPosePositionY(pose)
-                newPosX = int((newPosX + (const.HALF_REALMAP_WIDTH))  / const.RESL)
-                newPosY = int((newPosY + (const.HALF_REALMAP_HEIGHT)) / const.RESL)
-                simGlobalMap.setGlobalMapRobotPath(newPosX, newPosY)
-
-                pool = Pool(4)
-                mapping_async = pool.apply_async(refreshGrid, [currentRobot, simGlobalMap, angLaser])
-                pool.close()
-
-                #refreshGrid(currentRobot, simGlobalMap, angLaser)
-                #stopRobot(currentRobot)
-                simGlobalMap.evaporatePheromone()
-                #simGlobalMap.resetGlobalMapVisit()
-                currentRobot.localMap.resetGlobalMapVisit()
-                
+        executor.shutdown()
 
         for robotName in listRobots:
             currentRobot = getattr(morse, robotName)
@@ -242,16 +243,16 @@ def main():
             simulationTimeMinutes = simulationTimeMinutes - 60
             simulationTimeHours = simulationTimeHours + 1
 
+        print("Simulation iterations: %i" % iterations)
         print("Simulation time: %i hour(s), %i minute(s) and  %.2f second(s).\n\n" % (simulationTimeHours, simulationTimeMinutes, simulationTimeSeconds))
-        
+
         printOccupancyGridMap(simGlobalMap, const.MAP_WIDTH, const.MAP_HEIGHT)
         printVisitMap(simGlobalMap, const.MAP_WIDTH, const.MAP_HEIGHT)
         printPathMap(simGlobalMap, const.MAP_WIDTH, const.MAP_HEIGHT)
         printPheromoneMap(simGlobalMap, const.MAP_WIDTH, const.MAP_HEIGHT)
 
-        print("Maps generated for %i iterations: " % iterations)
-        print("occupancy_grid.txt, visit_map.txt, path_map.txt, pheromone_map.txt")
-        print("------ Surveillance ended. -----")
+        print("Files generated: occupancy_grid.txt, visit_map.txt, path_map.txt, pheromone_map.txt\n")
+        print("--------------- END ---------------")
 
 if __name__ == "__main__":
     main()
