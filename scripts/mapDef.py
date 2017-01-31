@@ -30,7 +30,7 @@ class GlobalMap:
         auxVisit = globalMap.cellMap[((const.MAP_WIDTH - 1 - y) * const.MAP_WIDTH) + x].visit
         return auxVisit
 
-    def getGlobalMapPheromoneRatio(globalMap, x, y):
+    def getGlobalMapPheromone(globalMap, x, y):
         auxPheromone = globalMap.cellMap[((const.MAP_WIDTH - 1 - y) * const.MAP_WIDTH) + x].qPheromone
         return auxPheromone
 
