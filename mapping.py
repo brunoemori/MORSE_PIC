@@ -14,8 +14,8 @@ for i in range(const.MAP_HEIGHT * const.MAP_WIDTH):
 
 angLaser = [(math.pi / 2) * (-1)]
 
-for count in range(1, 361):
-    aux = angLaser[count - 1] + 0.00872
+for count in range(const.LAST_LASER + 1):
+    aux = angLaser[count] + const.DIST_LASER
     angLaser.append(aux)
 
 #Global map 
@@ -101,7 +101,7 @@ def refreshGrid(idRobot, globalMap, angLaser):
     posX = int((posX + (const.HALF_REALMAP_WIDTH))  / const.RESL)
     posY = int((posY + (const.HALF_REALMAP_HEIGHT)) / const.RESL)
 
-    for i in range(const.FIRST_LASER, const.LAST_LASER + 1):
+    for i in range(const.LAST_LASER + 1):
         if rangeLaser[i] < (const.RANGE_MAX * const.RANGE_LIMIT):
             rateOC = 0.9
         else:
