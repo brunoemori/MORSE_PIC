@@ -12,6 +12,7 @@ FIRST_LASER = 0
 LAST_LASER = 360
 RANGE_MAX = 10 #Maximum reach of the robot's sensor
 RANGE_LIMIT = 0.6 #Verify!
+DIST_LASER = 0.00872 #in radians
 
 #Map constants
 MAP_WIDTH = 562
